@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 @RequestMapping(value="v1/organization/{organizationId}/license")
 public class LicenseController {
@@ -21,6 +24,19 @@ public class LicenseController {
     ) {
         License license = licenseService
                 .getLicense(licenseId, organizationId);
+
+            license.add(linkTo(methodOn(LicenseController.class)
+                            .getLicense(organizationId, license.getLicenseId()))
+                            .withSelfRel(),
+                    linkTo(methodOn(LicenseController.class)
+                            .createLicense(organizationId, license))
+                            .withRel("createLicense"),
+                    linkTo(methodOn(LicenseController.class)
+                            .deleteLicense(organizationId, licenseId))
+                            .withRel("deleteLicense"),
+                    linkTo(methodOn(LicenseController.class)
+                            .updateLicense(organizationId, license))
+                            .withRel("updateLicense"));
         return ResponseEntity.ok(license);
     }
 
